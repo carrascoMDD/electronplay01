@@ -40,8 +40,15 @@ class Main {
             slashes: true,
         }));
         Main.m2mWindow.on('closed', Main.onCloseM2M);
-        Main.m2mWindow.webContents.openDevTools();
-        DbReToMendix_1.default.dbreToMendix(Main.m2mWindow);
+        /*Main.m2mWindow.webContents.once('did-finish-load', () => {
+            DbReToMendix.dbreToMendix( Main.m2mWindow);
+        })*/
+        Main.m2mWindow.webContents.once('did-finish-load', () => {
+            Main.m2mWindow.webContents.openDevTools();
+            Main.m2mWindow.webContents.once('devtools-opened', () => {
+                DbReToMendix_1.default.dbreToMendix(Main.m2mWindow);
+            });
+        });
     }
     static main(app) {
         // we pass the Electron.App object and the

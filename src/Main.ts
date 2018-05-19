@@ -56,9 +56,18 @@ export default class Main {
 
         Main.m2mWindow.on('closed', Main.onCloseM2M);
 
-        Main.m2mWindow.webContents.openDevTools();
 
-        DbReToMendix.dbreToMendix( Main.m2mWindow);
+
+        /*Main.m2mWindow.webContents.once('did-finish-load', () => {
+            DbReToMendix.dbreToMendix( Main.m2mWindow);
+        })*/
+        Main.m2mWindow.webContents.once('did-finish-load', () => {
+            Main.m2mWindow.webContents.openDevTools();
+            Main.m2mWindow.webContents.once('devtools-opened', () => {
+                DbReToMendix.dbreToMendix( Main.m2mWindow);
+            });
+        });
+
     }
 
     static main(app: Electron.App) {
