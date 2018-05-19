@@ -29,6 +29,12 @@
     "lint": "tslint -c tslint.json -p tsconfig.json",
     "start": "npm run build && electron ./dist/main.js"
   },
+  "dependencies": {
+    "@types/when": "^2.4.28",
+    "mendixmodelsdk": "~4.10.0",
+    "mendixplatformsdk": "~4.0.0",
+    "when": "^2.4.28"
+  },
   "devDependencies": {
     "electron": "^1.8.4",
     "tslint": "^5.9.1",
