@@ -2,6 +2,9 @@ import { BrowserWindow } from 'electron';
 import * as path from "path";
 import * as url from "url";
 
+import DbReToMendix from './DbReToMendix';
+
+
 export default class Main {
     static mainWindow: Electron.BrowserWindow;
     static application: Electron.App;
@@ -34,5 +37,7 @@ export default class Main {
         Main.application = app;
         Main.application.on('window-all-closed', Main.onWindowAllClosed);
         Main.application.on('ready', Main.onReady);
+
+        DbReToMendix.dbreToMendix();
     }
 }

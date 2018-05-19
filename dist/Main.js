@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const electron_1 = require("electron");
 const path = require("path");
 const url = require("url");
+const DbReToMendix_1 = require("./DbReToMendix");
 class Main {
     static onWindowAllClosed() {
         if (process.platform !== 'darwin') {
@@ -30,6 +31,7 @@ class Main {
         Main.application = app;
         Main.application.on('window-all-closed', Main.onWindowAllClosed);
         Main.application.on('ready', Main.onReady);
+        DbReToMendix_1.default.dbreToMendix();
     }
 }
 exports.default = Main;

@@ -9,7 +9,7 @@ export default class DbReToMendix {
 
 
     private static readonly username = 'carrascoMendix@ModelDD.org';
-    private static readonly apikey = '883ea2d1-12da-45d8-9474-9f7a8363771f'; // Key description "For MendixSdkTst01" created 20180506
+    private static readonly apikey = '5a6a99f7-152e-48ff-9436-81ca15c35d7d'; // Key description "For MendixSdkTst01" created 20180506
     private static readonly baseProjectName = 'ACVappMendixSdkTst01-';
     private static readonly baseEntityName = 'ACVEntity_';
     private static readonly client = new MendixSdkClient(DbReToMendix.username, DbReToMendix.apikey);

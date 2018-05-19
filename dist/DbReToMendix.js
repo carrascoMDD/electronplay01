@@ -40,7 +40,7 @@ class DbReToMendix {
     }
 }
 DbReToMendix.username = 'carrascoMendix@ModelDD.org';
-DbReToMendix.apikey = '883ea2d1-12da-45d8-9474-9f7a8363771f'; // Key description "For MendixSdkTst01" created 20180506
+DbReToMendix.apikey = '5a6a99f7-152e-48ff-9436-81ca15c35d7d'; // Key description "For MendixSdkTst01" created 20180506
 DbReToMendix.baseProjectName = 'ACVappMendixSdkTst01-';
 DbReToMendix.baseEntityName = 'ACVEntity_';
 DbReToMendix.client = new mendixplatformsdk_1.MendixSdkClient(DbReToMendix.username, DbReToMendix.apikey);
