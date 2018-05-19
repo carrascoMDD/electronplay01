@@ -1,0 +1,43 @@
+{
+  "name": "electronplay01",
+  "version": "0.0.1",
+  "description": "Setup an ElectronJS + Typescript playground project by harvesting https://github.com/electron/electron-quick-start-typescript",
+  "keywords": [
+    "Electron",
+    "quick",
+    "start",
+    "tutorial",
+    "demo",
+    "typescript"
+  ],
+  "homepage": "http://github.com/carrascoMDD/electronplay01",
+  "bugs": {
+    "url": "http://github.com/carrascoMDD/electronplay01/issues"
+  },
+  "license": "EUPL-1.1",
+  "author": {
+    "name": "Antonio Carrasco Valero",
+    "email": "carrascomdd@gmail.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/carrascoMDD/electronplay01.git"
+  },
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc -w",
+    "lint": "tslint -c tslint.json -p tsconfig.json",
+    "start": "npm run build && electron ./dist/main.js"
+  },
+  "devDependencies": {
+    "electron": "^1.8.4",
+    "tslint": "^5.9.1",
+    "typescript": "^2.6.2"
+  },
+  "maintainers": [
+    {
+      "name": "Antonio Carrasco Valero",
+      "email": "carrascomdd@gmail.com"
+    }
+  ]
+}
