@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const mendixmodelsdk_1 = require("mendixmodelsdk");
 class M2MFromDbRe {
-    static populateMendixFromDBRE(theDomainModel, theDBRE) {
+    static populateMendixFromDBRE(theDomainModel, theDBRE, theBrowserWindow) {
         console.info("HI!");
         const someFKTablesAndColumns = new Map();
         const someTables = M2MFromDbRe.chooseAFewTables(theDBRE, someFKTablesAndColumns);
@@ -12,14 +12,14 @@ class M2MFromDbRe {
         let anYCursor = M2MFromDbRe.YCURSOR_INITIAL;
         for (let aTableIdx = 0; aTableIdx < aNumTables; aTableIdx++) {
             let aTable = someTables[aTableIdx];
-            anYCursor = M2MFromDbRe.createAndPopulateEntity(theDomainModel, aTable, someFKTablesAndColumns, anXCursor, anYCursor);
+            anYCursor = M2MFromDbRe.createAndPopulateEntity(theDomainModel, aTable, someFKTablesAndColumns, anXCursor, anYCursor, theBrowserWindow);
             if (anYCursor > M2MFromDbRe.YCURSOR_MAX) {
                 anXCursor = anXCursor + M2MFromDbRe.XCURSOR_SPACE;
                 anYCursor = M2MFromDbRe.YCURSOR_INITIAL;
             }
             console.info("Entity " + (aTableIdx + 1) + " of " + aNumTables + "\n\n");
         }
-        M2MFromDbRe.createAndPopulateAssociations(theDomainModel, someTables, someFKTablesAndColumns);
+        M2MFromDbRe.createAndPopulateAssociations(theDomainModel, someTables, someFKTablesAndColumns, theBrowserWindow);
     }
     static chooseAFewTables(theDBRE, theFKTablesAndColumns) {
         const someTables = M2MFromDbRe.rankTables(theDBRE.table, theFKTablesAndColumns);
@@ -114,8 +114,9 @@ class M2MFromDbRe {
             someFKColumns.push(theColumnName);
         }
     }
-    static createAndPopulateEntity(theDomainModel, theTable, theFKTablesAndColumns, theXCursor, theYCursor) {
+    static createAndPopulateEntity(theDomainModel, theTable, theFKTablesAndColumns, theXCursor, theYCursor, theBrowserWindow) {
         console.info("+ Entity " + theTable.name);
+        theBrowserWindow.webContents.send('DbReToMendix_CREATEENTITY', theTable.name);
         const aNewEntity = mendixmodelsdk_1.domainmodels.Entity.createIn(theDomainModel);
         aNewEntity.name = theTable.name;
         aNewEntity.location = { x: theXCursor, y: theYCursor };
@@ -125,7 +126,7 @@ class M2MFromDbRe {
         const someColumns = M2MFromDbRe.chooseAFewAttributes(theTable, theFKTablesAndColumns);
         console.info("  ... about to create " + someColumns.length + " attributes");
         for (let aColumn of someColumns) {
-            M2MFromDbRe.createAndPopulateAttribute(theDomainModel, aNewEntity, aColumn);
+            M2MFromDbRe.createAndPopulateAttribute(theDomainModel, aNewEntity, aColumn, theBrowserWindow);
         }
         console.info("  ok");
         console.info("  + " + someColumns.length + " attributes");
@@ -198,12 +199,13 @@ class M2MFromDbRe {
         }
         return someColumns;
     }
-    static createAndPopulateAttribute(theDomainModel, theEntity, theColumn) {
+    static createAndPopulateAttribute(theDomainModel, theEntity, theColumn, theBrowserWindow) {
         let anAttributeName = theColumn.name;
         if (anAttributeName.toUpperCase() == "ID") {
             anAttributeName = "ID_BYDBRE";
         }
         console.info("   + Attribute " + anAttributeName);
+        theBrowserWindow.webContents.send('DbReToMendix_CREATEATTRIBUTE', anAttributeName);
         const aNewAttribute = mendixmodelsdk_1.domainmodels.Attribute.createIn(theEntity);
         aNewAttribute.name = anAttributeName;
         if (M2MFromDbRe.DOCUMENTATIONFROMSOURCE) {
@@ -259,7 +261,7 @@ class M2MFromDbRe {
     /* Create Associations from foreign keys in the reverse engineeded model.
      The tables with columns which are involved in a Foreign Key as local or foreign column have been collected in a previous step into theFKTablesAndColumns
     */
-    static createAndPopulateAssociations(theDomainModel, theTables, theFKTablesAndColumns) {
+    static createAndPopulateAssociations(theDomainModel, theTables, theFKTablesAndColumns, theBrowserWindow) {
         // map tables by name for faster log N access below
         const allTablesByName = new Map();
         for (let aTable of theTables) {
@@ -306,6 +308,7 @@ class M2MFromDbRe {
                 }
                 const aForeignEntity = someForeignEntities[0];
                 console.info("   + Association " + aForeignKey.name);
+                theBrowserWindow.webContents.send('DbReToMendix_CREATEASSOCIATION', aForeignKey.name);
                 // https://apidocs.mendix.com/modelsdk/latest/classes/domainmodels.association.html
                 const aNewAssociation = mendixmodelsdk_1.domainmodels.Association.createIn(theDomainModel);
                 aNewAssociation.name = aForeignKey.name;

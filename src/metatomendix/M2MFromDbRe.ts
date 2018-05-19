@@ -1,8 +1,11 @@
 // M2MFromDbRe.ts
 
+import { BrowserWindow } from 'electron';
+
 import { domainmodels } from 'mendixmodelsdk';
 
 import {Icolumn, IDbRe, Itable} from '../sourcemeta/IDbRe';
+
 
 
 export default class M2MFromDbRe {
@@ -36,7 +39,7 @@ actually see diagram
 
 
 
-    static populateMendixFromDBRE( theDomainModel : domainmodels.DomainModel, theDBRE : IDbRe) {
+    static populateMendixFromDBRE( theDomainModel : domainmodels.DomainModel, theDBRE : IDbRe, theBrowserWindow: BrowserWindow) {
 
         console.info( "HI!");
 
@@ -50,7 +53,7 @@ actually see diagram
 
         for( let aTableIdx = 0; aTableIdx < aNumTables; aTableIdx++) {
             let aTable = someTables[ aTableIdx];
-            anYCursor = M2MFromDbRe.createAndPopulateEntity( theDomainModel, aTable, someFKTablesAndColumns, anXCursor, anYCursor);
+            anYCursor = M2MFromDbRe.createAndPopulateEntity( theDomainModel, aTable, someFKTablesAndColumns, anXCursor, anYCursor, theBrowserWindow);
             if( anYCursor > M2MFromDbRe.YCURSOR_MAX) {
                 anXCursor = anXCursor + M2MFromDbRe.XCURSOR_SPACE;
                 anYCursor = M2MFromDbRe.YCURSOR_INITIAL;
@@ -58,7 +61,7 @@ actually see diagram
             console.info( "Entity " + ( aTableIdx + 1) + " of " + aNumTables + "\n\n");
         }
 
-        M2MFromDbRe.createAndPopulateAssociations( theDomainModel, someTables, someFKTablesAndColumns);
+        M2MFromDbRe.createAndPopulateAssociations( theDomainModel, someTables, someFKTablesAndColumns, theBrowserWindow);
     }
 
 
@@ -180,9 +183,10 @@ actually see diagram
 
 
     private static createAndPopulateEntity( theDomainModel : domainmodels.DomainModel, theTable: Itable, theFKTablesAndColumns : Map<string, string[]>,
-                                      theXCursor: number, theYCursor: number):number {
+                                      theXCursor: number, theYCursor: number, theBrowserWindow: BrowserWindow):number {
 
         console.info( "+ Entity " + theTable.name);
+        theBrowserWindow.webContents.send('DbReToMendix_CREATEENTITY', theTable.name);
 
         const aNewEntity = domainmodels.Entity.createIn(theDomainModel);
         aNewEntity.name = theTable.name;
@@ -195,7 +199,7 @@ actually see diagram
         console.info( "  ... about to create " + someColumns.length + " attributes");
         for( let aColumn of someColumns) {
 
-            M2MFromDbRe.createAndPopulateAttribute( theDomainModel, aNewEntity, aColumn);
+            M2MFromDbRe.createAndPopulateAttribute( theDomainModel, aNewEntity, aColumn, theBrowserWindow);
         }
         console.info( "  ok");
         console.info( "  + " + someColumns.length + " attributes");
@@ -293,13 +297,14 @@ actually see diagram
 
 
 
-    private static createAndPopulateAttribute( theDomainModel : domainmodels.DomainModel, theEntity: domainmodels.Entity, theColumn: Icolumn) {
+    private static createAndPopulateAttribute( theDomainModel : domainmodels.DomainModel, theEntity: domainmodels.Entity, theColumn: Icolumn, theBrowserWindow: BrowserWindow) {
 
         let anAttributeName = theColumn.name;
         if( anAttributeName.toUpperCase() == "ID") {
             anAttributeName = "ID_BYDBRE";
         }
         console.info( "   + Attribute " + anAttributeName);
+        theBrowserWindow.webContents.send('DbReToMendix_CREATEATTRIBUTE', anAttributeName);
 
         const aNewAttribute = domainmodels.Attribute.createIn(theEntity);
 
@@ -367,7 +372,7 @@ actually see diagram
     /* Create Associations from foreign keys in the reverse engineeded model.
      The tables with columns which are involved in a Foreign Key as local or foreign column have been collected in a previous step into theFKTablesAndColumns
     */
-    private static createAndPopulateAssociations( theDomainModel : domainmodels.DomainModel, theTables: Itable[], theFKTablesAndColumns : Map<string, string[]>) {
+    private static createAndPopulateAssociations( theDomainModel : domainmodels.DomainModel, theTables: Itable[], theFKTablesAndColumns : Map<string, string[]>, theBrowserWindow: BrowserWindow) {
 
         // map tables by name for faster log N access below
         const allTablesByName = new Map<string, Itable>();
@@ -426,6 +431,7 @@ actually see diagram
 
 
                 console.info( "   + Association " + aForeignKey.name);
+                theBrowserWindow.webContents.send('DbReToMendix_CREATEASSOCIATION', aForeignKey.name);
 
                 // https://apidocs.mendix.com/modelsdk/latest/classes/domainmodels.association.html
                 const aNewAssociation = domainmodels.Association.createIn(theDomainModel);

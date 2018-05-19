@@ -14,22 +14,32 @@ const M2MFromDbRe_1 = require("./metatomendix/M2MFromDbRe");
 const Conversions_1 = require("./utils/Conversions");
 class DbReToMendix {
     /* After execution, visit https://sprintr.home.mendix.com/index.html */
-    static dbreToMendix() {
+    static dbreToMendix(theBrowserWindow) {
         return __awaiter(this, void 0, void 0, function* () {
-            const project = yield DbReToMendix.client.platform().createNewApp(`${DbReToMendix.baseProjectName}${Conversions_1.default.fDateToTimestampWOsepsStr(new Date())}`);
+            const projectName = `${DbReToMendix.baseProjectName}${Conversions_1.default.fDateToTimestampWOsepsStr(new Date())}`;
+            theBrowserWindow.webContents.send('DbReToMendix_CREATEPRJ', projectName);
+            const project = yield DbReToMendix.client.platform().createNewApp(projectName);
+            theBrowserWindow.webContents.send('DbReToMendix_CREATEWKCOPY', projectName);
             const workingCopy = yield project.createWorkingCopy();
             const domainModel = yield DbReToMendix.loadDomainModel(workingCopy);
+            theBrowserWindow.webContents.send('DbReToMendix_STARTPOPULATION', projectName);
             try {
-                M2MFromDbRe_1.default.populateMendixFromDBRE(domainModel, DbRe_1.default);
+                M2MFromDbRe_1.default.populateMendixFromDBRE(domainModel, DbRe_1.default, theBrowserWindow);
             }
             catch (error) {
+                const aMessage = 'Error during populating Mendix model:' + error;
+                theBrowserWindow.webContents.send('DbReToMendix_FAILEDPOPULATION', aMessage);
                 console.error('Error during populating Mendix model:', error);
             }
             try {
                 const revision = yield workingCopy.commit();
-                console.log(`Successfully committed revision: ${revision.num()}. Done.`);
+                const aMessage = `Successfully committed revision: ${revision.num()}. Done.`;
+                theBrowserWindow.webContents.send('DbReToMendix_SUCCESSPOPULATION', aMessage);
+                console.log(aMessage);
             }
             catch (error) {
+                const aMessage = 'Error during commit Mendix model:' + error;
+                theBrowserWindow.webContents.send('DbReToMendix_FAILED', aMessage);
                 console.error('Error during commit Mendix model:', error);
             }
         });
